@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using AspCoreModule2.Services;
 
 namespace AspCoreModule2
 {
@@ -16,7 +17,7 @@ namespace AspCoreModule2
         public Startup()
         {
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json");
+                .AddJsonFile("C:\\Projects\\AspCoreModule2\\src\\AspCoreModule2\\appsettings.json");
             Configuration = builder.Build();
         }
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -25,10 +26,12 @@ namespace AspCoreModule2
             public IConfiguration Configuration { get; set; }
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(provider => Configuration);
+            services.AddSingleton<IGreeter, Greeter>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IGreeter greeting)
         {
             loggerFactory.AddConsole();
 
@@ -36,7 +39,7 @@ namespace AspCoreModule2
             {
                 app.UseDeveloperExceptionPage();
             }
-            var Welcome = Configuration["Welcome"];
+            var Welcome = greeting.GetGreeting();
             app.Run(async (context) =>
             {
                 await context.Response.WriteAsync(Welcome);
